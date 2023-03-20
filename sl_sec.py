@@ -42,16 +42,17 @@ def sec_api(cik):
     df_units = df.iloc[2:3] #ONLY WANT ROW 3, WHICH CONTAINS VALUES (I.E. "UNITS")
 
     df_final = pd.DataFrame()
-    def scrub_json(data_list, entry_key):
+    def scrub_json(data_list, entry_key, col):
         df = pd.json_normalize(data_list[entry_key])
         df['PERIOD'] = df['fy'].astype(str) + df['fp'].astype(str)
+        df = df[df['frame'].astype(str).str.contains('CY') == True]
         df = df.sort_values(by=['filed'], ascending=False)
-        df = df.dropna(subset=['frame'])
-        df = df[df['frame'] != '']
-        df = df.rename(columns={'end':'DATE'})
-        df = df.set_index(['DATE', 'PERIOD']).sort_index(ascending=False).drop_duplicates(subset=['accn'], keep='first')
-        df = df[['val']]
-        df = df.rename(columns={'val':f'{col}'})
+        df = df.drop_duplicates(subset=['accn'], keep='first')
+        df['end'] = pd.to_datetime(df['end'])
+        # df = df.rename(columns={'end':'DATE'})
+        df = df.set_index(['PERIOD', 'form']).sort_index(ascending=False)
+        df = df[['end', 'val']]
+        df = df.rename(columns={'end':'fin_end_date', 'val':f'{col}'})
         return df
 
     col_list = ('Revenues', 'SalesRevenueNet', 'RevenueFromContractWithCustomerExcludingAssessedTax', 'NetIncomeLoss',
@@ -64,24 +65,31 @@ def sec_api(cik):
 
     df_final = pd.DataFrame()
     y=0
-
     for x, col in enumerate(df_units.columns):
         test_list = df_units[col].tolist()[0]
-
+        print(x)
         if col in col_list:
             try:
-                df_json = scrub_json(test_list, 'USD')
-                df_json = scrub_json(test_list, 'pure')
-                df_json = scrub_json(test_list, 'shares')
-                df_json = scrub_json(test_list, 'USD/shares')
+                df_json = scrub_json(test_list, 'USD', col)
             except:
-                pass
-
+                try:
+                    df_json = scrub_json(test_list, 'pure', col)
+                except:
+                    try:
+                        df_json = scrub_json(test_list, 'shares', col)
+                    except:
+                        try:
+                            df_json = scrub_json(test_list, 'USD/shares', col)
+                        except:
+                            pass
+    
             if y == 0:
                 df_final = df_json
-                y =+ 1
+                y = y+1
             else:
-                df_final = df_final.merge(df_json, how='left', left_index=True, right_index=True)
+                df_final = df_final.merge(df_json[f'{col}'], how='left', left_index=True, right_index=True)
+        else:
+            pass
 
     df_final = df_final.reset_index()
 
