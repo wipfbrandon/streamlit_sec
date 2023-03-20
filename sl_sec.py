@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-env:
-    EMAIL: ${{ secrets.EMAIL }}
 
 cik_dict = {'Daktronics': '0000915779',
             '3M Company': '0000066740',
