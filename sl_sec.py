@@ -114,7 +114,8 @@ def sec_api(cik):
         return df
 
     df_ye = quarterly_financials(df_final, 'FY')
-    return df_ye, comp_summ_list
+    df_q3 = quarterly_financials(df_final, 'Q3')
+    return df_ye, comp_summ_list, df_q3
 
 #%% STREAMLIT OUTPUT
 add_selectbox = st.sidebar.selectbox(
@@ -128,6 +129,7 @@ cik_selected = cik_dict[add_selectbox]
 result_set = sec_api(cik_selected)
 df_final = result_set[0]
 list_details = result_set[1]
+df_3q = result_set[2]
 
 st.title('SEC Financials')
 st.sidebar.write(f'INDUSTRY: {list_details[1]}')
@@ -140,6 +142,7 @@ f"""
 Financials Metrics for {add_selectbox}:
 """
 st.dataframe(df_final)
+st.dataframe(df_3q)
 '''---
 AR Days
 '''
