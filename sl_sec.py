@@ -140,8 +140,14 @@ st.sidebar.write(f'OPERATIONS: {list_details[6]}, {list_details[5]}')
 
 f"""
 Financials Metrics for {add_selectbox}:
-"""
+"""         
+'''---
+YE Details
+'''
 st.dataframe(df_final)
+'''---
+Q3 Details
+'''
 st.dataframe(df_3q)
 '''---
 AR Days
