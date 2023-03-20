@@ -2,8 +2,6 @@ import streamlit as st
 import pandas as pd
 import requests
 
-SECRET_EMAIL =  ${{ secrets.EMAIL }}
-
 cik_dict = {'Daktronics': '0000915779',
             '3M Company': '0000066740',
             'Union Pacific':'0000100885',
@@ -17,7 +15,7 @@ cik_dict = {'Daktronics': '0000915779',
 
 @st.cache_data
 def sec_api(cik):
-    headers = {'User-Agent': SECRET_EMAIL}
+    headers = {'User-Agent': 'pythonlearnin@gmail.com'}
 #COMPANY SUMMARY
     comp_summ_list = []
     url = f'https://data.sec.gov/submissions/CIK{cik}.json'
