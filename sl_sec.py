@@ -49,7 +49,6 @@ def sec_api(cik):
         df = df.sort_values(by=['filed'], ascending=False)
         df = df.drop_duplicates(subset=['accn'], keep='first')
         df['end'] = pd.to_datetime(df['end'])
-        # df = df.rename(columns={'end':'DATE'})
         df = df.set_index(['PERIOD', 'form']).sort_index(ascending=False)
         df = df[['end', 'val']]
         df = df.rename(columns={'end':'fin_end_date', 'val':f'{col}'})
@@ -109,15 +108,11 @@ def sec_api(cik):
             df['LIABILITIES_CUSTOM'] = df['LiabilitiesAndStockholdersEquity'] - df['StockholdersEquity']
         except:
             pass
-        df = df.set_index(['DATE'])
+        df = df.set_index(['PERIOD'])
         df = df.dropna(axis=1, how='all')
         return df
 
     df_ye = quarterly_financials(df_final, 'FY')
-    # df_ye = df_ye[['Assets','LIABILITIES_CUSTOM', 'StockholdersEquity', 'AssetsCurrent',
-    #                'LiabilitiesCurrent','NetIncomeLoss','REVENUE_CUSTOM', 'PROFIT_MARGIN',
-    #                'NET_INCOME_PCT_CHG', 'CURRENT_RATIO','AR_DAYS']]
-
     return df_ye, comp_summ_list
 
 #%% STREAMLIT OUTPUT
@@ -130,7 +125,6 @@ cik_selected = cik_dict[add_selectbox]
 
 #%% SELECT SPECIFIC COMPANY
 result_set = sec_api(cik_selected)
-# df_selected_df = sec_api('0000066740')
 df_final = result_set[0]
 list_details = result_set[1]
 
