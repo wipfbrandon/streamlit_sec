@@ -15,7 +15,7 @@ cik_dict = {'Daktronics': '0000915779',
 
 @st.cache_data
 def sec_api(cik):
-    headers = {'User-Agent': "pythonlearnin@gmail.com"}
+    headers = {'User-Agent': ${{ secrets.EMAIL }}}
 #COMPANY SUMMARY
     comp_summ_list = []
     url = f'https://data.sec.gov/submissions/CIK{cik}.json'
