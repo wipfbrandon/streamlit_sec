@@ -9,7 +9,8 @@ cik_dict = {'Daktronics': '0000915779',
             'ConAgra Foods Inc':'0000023217',
             'Valmont Industries':'0000102729',
             'Werner Enterprises':'0000793074',
-            'SeaWorld':'0001564902',            
+            'SeaWorld':'0001564902',       
+            'Cedar Fair':'0000811532',
     }
 
 @st.cache_data
