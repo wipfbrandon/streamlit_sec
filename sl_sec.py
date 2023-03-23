@@ -59,6 +59,7 @@ def sec_api(cik):
     df = pd.json_normalize(r.json()['facts']['us-gaap'])
     
     keep_list = ('Assets', 'Liabilities', 'StockholdersEquity', 'LiabilitiesAndStockholdersEquity',
+                 'SalesRevenueNet', 'CostOfGoodsAndServicesSold', ' NetIncomeLoss',
                  'Revenues', 'SalesRevenueNet', 'RevenueFromContractWithCustomerExcludingAssessedTax')
 
 	for x, col in enumerate(df.columns):
