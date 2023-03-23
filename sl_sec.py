@@ -11,6 +11,7 @@ cik_dict = {'Daktronics': '0000915779',
             'Werner Enterprises':'0000793074',
             'SeaWorld':'0001564902',       
             'Cedar Fair':'0000811532',
+            'NVIDIA':'0001045810',
     }
 
 @st.cache_data
