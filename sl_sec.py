@@ -142,9 +142,5 @@ Q3 Details
 '''
 st.dataframe(df_3q)
 '''---
-AR Days
-'''
-st.bar_chart(df_final[['AR_DAYS']])
-'''---
 Net Income'''
 st.line_chart(df_final[['REVENUE_CUSTOM', 'NetIncomeLoss']])
