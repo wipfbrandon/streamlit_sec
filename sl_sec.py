@@ -4,20 +4,6 @@ import requests
 from datetime import date
 
 pd.options.mode.chained_assignment = None  # default='warn'
-curr_year = date.today().year
-lookback_years = 8
-
-period_list = []
-for x in range(0, lookback_years):
-    new_year = curr_year - x
-    frame_ye = f'CY{new_year}'
-    period_list.append(frame_ye)
-    for y in range(4, 0, -1):
-        frame_qe = f'CY{new_year}Q{y}'
-        frame_qe_i = f'CY{new_year}Q{y}I'
-        period_list.append(frame_qe)
-
-df_final = pd.DataFrame(index=period_list)
 		
 cik_dict = {'Daktronics': '0000915779',
             '3M Company': '0000066740',
@@ -32,7 +18,22 @@ cik_dict = {'Daktronics': '0000915779',
     }
 
 @st.cache_data
-def sec_api(cik):
+    def sec_api(cik):
+    curr_year = date.today().year
+    lookback_years = 8
+
+    period_list = []
+    for x in range(0, lookback_years):
+        new_year = curr_year - x
+        frame_ye = f'CY{new_year}'
+        period_list.append(frame_ye)
+        for y in range(4, 0, -1):
+            frame_qe = f'CY{new_year}Q{y}'
+            frame_qe_i = f'CY{new_year}Q{y}I'
+            period_list.append(frame_qe)
+
+    df_final = pd.DataFrame(index=period_list)
+	
     headers = {'User-Agent': 'pythonlearnin@gmail.com'}
 #COMPANY SUMMARY
     comp_summ_list = []
