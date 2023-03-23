@@ -29,7 +29,6 @@ def sec_api(cik):
         period_list.append(frame_ye)
         for y in range(4, 0, -1):
             frame_qe = f'CY{new_year}Q{y}'
-            frame_qe_i = f'CY{new_year}Q{y}I'
             period_list.append(frame_qe)
 
     df_final = pd.DataFrame(index=period_list)
@@ -83,13 +82,13 @@ def sec_api(cik):
                 else:
                     df_temp_cy = df_temp_cy[[f'{col_name}']]
                     df_final = df_final.merge(df_temp_cy, how='left', left_index=True, right_index=True)
-						
-    df_final = df_final.sort_index(ascending=False).reset_index()
+
+    df_final = df_final.sort_index(ascending=False).reset_index().rename(columns={'index': 'FRAME'})
 
     days_dict = {'FY':365.00, 'Q4':91.25, 'Q3':91.25, 'Q2':91.25, 'Q1':91.25}
     def quarterly_financials(df_source, period='FY'):
         days = days_dict[period]
-        df = df_source[df_source['PERIOD'].str.contains(f'{period}')]
+        df = df_source[df_source['FRAME'].str.contains(f'{period}')]
 
         try:
             df['REVENUE_CUSTOM'] = df[['Revenues', 'SalesRevenueNet', 'RevenueFromContractWithCustomerExcludingAssessedTax']].max(axis=1)
@@ -102,7 +101,7 @@ def sec_api(cik):
             df['LIABILITIES_CUSTOM'] = df['LiabilitiesAndStockholdersEquity'] - df['StockholdersEquity']
         except:
             pass
-        df = df.set_index(['PERIOD'])
+        df = df.set_index(['FRAME'])
         df = df.dropna(axis=1, how='all')
         return df
 
@@ -142,6 +141,3 @@ st.dataframe(df_final)
 Q3 Details
 '''
 st.dataframe(df_3q)
-'''---
-Net Income'''
-st.line_chart(df_final[['REVENUE_CUSTOM', 'NetIncomeLoss']])
