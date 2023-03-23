@@ -62,25 +62,26 @@ def sec_api(cik):
                  'SalesRevenueNet', 'CostOfGoodsAndServicesSold', ' NetIncomeLoss',
                  'Revenues', 'SalesRevenueNet', 'RevenueFromContractWithCustomerExcludingAssessedTax')
 
-	for x, col in enumerate(df.columns):
-			col_name = col.split('.')[0]
-			col_type = col.split('.')[1]
-
-			if col_name in keep_list:
-				if col_type == 'units':
-					temp_list = df[col].explode('TEMP')
-					df_temp = (pd.DataFrame(temp_list.apply(pd.Series)))
-					df_temp = df_temp.rename(columns={'val':f'{col_name}'})
-					df_temp['frame'] = df_temp['frame'].str.replace('I', '')
-					df_temp = df_temp.set_index('frame')
-
-					if df_final.shape[1] == 0:
-						print(df_final.shape)
-						df_final = df_final.merge(df_temp, how='left', left_index=True, right_index=True)
-						df_final = df_final[['end','filed','fy','fp','form',f'{col_name}']]
-					else:
-						df_temp_cy = df_temp[[f'{col_name}']]
-						df_final = df_final.merge(df_temp, how='left', left_index=True, right_index=True)
+    for x, col in enumerate(df.columns):
+        col_name = col.split('.')[0]
+        col_type = col.split('.')[1]
+    
+        if col_name in keep_list:
+            if col_type == 'units':
+                temp_list = df[col].explode('TEMP')
+                df_temp = (pd.DataFrame(temp_list.apply(pd.Series)))
+                df_temp = df_temp.rename(columns={'val':f'{col_name}'})
+                df_temp_cy  = df_temp
+                df_temp_cy['frame'] = df_temp_cy['frame'].str.replace('I', '')
+                df_temp_cy = df_temp_cy.set_index('frame')
+    
+                if df_final.shape[1] == 0:
+                    print(df_final.shape)
+                    df_final = df_final.merge(df_temp_cy, how='left', left_index=True, right_index=True)
+                    df_final = df_final[['end','filed','fy','fp','form',f'{col_name}']]
+                else:
+                    df_temp_cy = df_temp_cy[[f'{col_name}']]
+                    df_final = df_final.merge(df_temp_cy, how='left', left_index=True, right_index=True)
 						
     df_final = df_final.sort_index(ascending=False).reset_index()
 
