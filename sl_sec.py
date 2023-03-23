@@ -60,7 +60,7 @@ def sec_api(cik):
     
     keep_list = ('Assets', 'Liabilities', 'StockholdersEquity', 'LiabilitiesAndStockholdersEquity',
                  'Revenues', 'SalesRevenueNet', 'RevenueFromContractWithCustomerExcludingAssessedTax')
-    
+
 	for x, col in enumerate(df.columns):
 			col_name = col.split('.')[0]
 			col_type = col.split('.')[1]
