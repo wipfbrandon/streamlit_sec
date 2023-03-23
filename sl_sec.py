@@ -37,7 +37,7 @@ def sec_api(cik):
 
 #COMPANY FACTS
     url =f'https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json'
-	r = requests.get(url, headers=headers)
+    r = requests.get(url, headers=headers)
     
     df = pd.json_normalize(r.json()['facts']['us-gaap'])
     
