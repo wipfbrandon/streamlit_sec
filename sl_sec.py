@@ -18,7 +18,7 @@ cik_dict = {'Daktronics': '0000915779',
     }
 
 @st.cache_data
-    def sec_api(cik):
+def sec_api(cik):
     curr_year = date.today().year
     lookback_years = 8
 
