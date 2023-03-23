@@ -36,61 +36,51 @@ def sec_api(cik):
     comp_summ_list.append(city_inc)
 
 #COMPANY FACTS
-    response = requests.get(f'https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json', headers=headers)
-    # parsed = json.loads(response.text)
-    response_json = response.json()
-    entries = response_json['facts']['us-gaap']
-    df = pd.DataFrame(entries)
-    df_units = df.iloc[2:3] #ONLY WANT ROW 3, WHICH CONTAINS VALUES (I.E. "UNITS")
-
-    df_final = pd.DataFrame()
-    def scrub_json(data_list, entry_key, col):
-        df = pd.json_normalize(data_list[entry_key])
-        df['PERIOD'] = df['fy'].astype(str) + df['fp'].astype(str)
-        df = df[df['frame'].astype(str).str.contains('CY') == True]
-        df = df.sort_values(by=['filed'], ascending=False)
-        df = df.drop_duplicates(subset=['accn'], keep='first')
-        df['end'] = pd.to_datetime(df['end'])
-        df = df.set_index(['PERIOD', 'form']).sort_index(ascending=False)
-        df = df[['end', 'val']]
-        df = df.rename(columns={'end':'fin_end_date', 'val':f'{col}'})
-        return df
-
-    col_list = ('Revenues', 'SalesRevenueNet', 'RevenueFromContractWithCustomerExcludingAssessedTax', 'NetIncomeLoss',
-              'AssetsCurrent', 'LiabilitiesCurrent', 'AccountsReceivableNetCurrent', 'LiabilitiesAndStockholdersEquity',
-              'StockholdersEquity', 'NetIncomeLoss', 'Assets', 'InventoryNet', 'Liabilities', 'AccountsPayableCurrent',
-              'CommonStockValue', 'ComprehensiveIncomeNetOfTax', 'CostOfGoodsAndServicesSold',
-              'Depreciation', 'GrossProfit', 'HeldToMaturitySecurities', 'AvailableForSaleSecurities', 'NetCashProvidedByUsedInFinancingActivities',
-              'NetCashProvidedByUsedInInvestingActivities', 'NetCashProvidedByUsedInOperatingActivities', 'OperatingIncomeLoss',
-              'ProfitLoss')
-
-    df_final = pd.DataFrame()
-    y=0
-    for x, col in enumerate(df_units.columns):
-        test_list = df_units[col].tolist()[0]
-        print(x)
-        if col in col_list:
-            try:
-                df_json = scrub_json(test_list, 'USD', col)
-            except:
-                try:
-                    df_json = scrub_json(test_list, 'pure', col)
-                except:
-                    try:
-                        df_json = scrub_json(test_list, 'shares', col)
-                    except:
-                        try:
-                            df_json = scrub_json(test_list, 'USD/shares', col)
-                        except:
-                            pass
+    url =f'https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json'
+	r = requests.get(url, headers=headers)
     
-            if y == 0:
-                df_final = df_json
-                y = y+1
-            else:
-                df_final = df_final.merge(df_json[f'{col}'], how='left', left_index=True, right_index=True)
-        else:
-            pass
+    df = pd.json_normalize(r.json()['facts']['us-gaap'])
+    
+    df_final = pd.DataFrame()
+    keep_list = ('Assets', 'Liabilities', 'StockholdersEquity', 'LiabilitiesAndStockholdersEquity',
+                 'Revenues', 'SalesRevenueNet', 'RevenueFromContractWithCustomerExcludingAssessedTax')
+    
+    y=0
+    for x, col in enumerate(df.columns):
+        col_name = col.split('.')[0]
+        col_type = col.split('.')[1]
+    
+        if col_name in keep_list:
+            if col_type == 'units':
+                temp_list = df[col].explode('TEMP')
+                df_temp = (pd.DataFrame(temp_list.apply(pd.Series)))
+    
+                df_temp['PERIOD'] = df_temp['fy'].astype(str) + df_temp['fp'].astype(str)
+                df_temp = df_temp.rename(columns={'end':'fin_end_date', 'val':f'{col_name}'})
+                df_temp_cy = df_temp[df_temp['frame'].astype(str).str.contains('CY') == True]
+                df_temp_cy['frame'] = df_temp_cy['frame'].str.replace('I', '')
+    
+                def fix_frame(frame, fp):
+                    if fp == 'FY':
+                        new_fp = 'Q4'
+                    else:
+                        new_fp = str(fp)
+                    if len(frame) < 7:
+                        new_frame = str(frame) + new_fp
+                    else:
+                        new_frame = frame
+                    return new_frame
+    
+                df_temp_cy['NEW_FRAME'] = df_temp_cy.apply(lambda row: fix_frame(row['frame'], row['fp']), axis=1)
+                df_temp_cy = df_temp_cy.drop_duplicates(subset=['NEW_FRAME'], keep='first')
+                df_temp_cy = df_temp_cy.set_index('NEW_FRAME')
+    
+                if y==0:
+                    df_final = df_temp_cy
+                    y=y+1
+                else:
+                    df_temp_cy = df_temp_cy[[f'{col_name}']]
+                    df_final = df_final.merge(df_temp_cy, how='left', left_index=True, right_index=True)
 
     df_final = df_final.reset_index()
 
