@@ -39,7 +39,6 @@ def set_periods(_lookback_years: int) -> pd.DataFrame:
     return df_frames
 
 
-@st.cache_data
 def get_comp_summary(_cik: str) -> dict:
     pass
     _headers = {'User-Agent': "pythonlearnin@gmail.com"}
@@ -103,7 +102,7 @@ def custom_revenue(rev, sales_rev, rev_from_cont):
     except:
         return 0
 
-
+@st.cache_data
 def enhance_comp_facts(_years : int = 8, _cik : str = '0001045810', _period : str = 'Q4') -> pd.DataFrame:
     df = clean_comp_facts(set_periods(_years), get_comp_facts(_cik))
 
@@ -162,7 +161,7 @@ df_q1 = enhance_comp_facts(lookback, cik_selected, 'Q1')
 frames = [df_q3, df_q2, df_q1]
 df_agg = pd.concat(frames)
 df_ardays_pivot = pd.pivot_table(df_agg, values='AR_DAYS', index=['YEAR'],
-                    columns=['PERIOD'], aggfunc=np.sum)
+                    columns=['PERIOD'], aggfunc=np.sum).fillna(0)
 
 st.title('SEC Financials')
 
