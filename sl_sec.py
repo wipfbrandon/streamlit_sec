@@ -158,9 +158,13 @@ df_q1 = enhance_comp_facts(lookback, cik_selected, 'Q1')
 
 frames = [df_q3, df_q2, df_q1]
 df_agg = pd.concat(frames)
+
+#SUMMARY PIVOTS
 df_ardays_pivot = pd.pivot_table(df_agg, values='AR_DAYS', index=['YEAR'],
                     columns=['PERIOD'], aggfunc=np.sum).fillna(0)
 
+df_revenue_pivot = pd.pivot_table(df_nvidia, values='GROSS_REV', index=['YEAR'],
+                    columns=['PERIOD'], aggfunc=np.sum).fillna(0)
 st.title('SEC Financials')
 
 st.sidebar.write(f"INDUSTRY: {company_summ['sic_desc']}")
@@ -185,6 +189,9 @@ Q1 Details
 '''
 st.dataframe(df_q1)
 '''
+REVENUE
+'''
+st.line_chart(df_revenue_pivot)
 AR DAYS
 '''
 st.dataframe(df_ardays_pivot)
