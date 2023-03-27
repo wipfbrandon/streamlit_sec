@@ -192,6 +192,7 @@ st.dataframe(df_q1)
 REVENUE
 '''
 st.line_chart(df_revenue_pivot)
+'''
 AR DAYS
 '''
 st.dataframe(df_ardays_pivot)
