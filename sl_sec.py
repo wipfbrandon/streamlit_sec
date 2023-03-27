@@ -151,7 +151,6 @@ cik_selected = cik_dict[add_selectbox_company]
 lookback = add_selectbox_years
 
 #%% SELECT SPECIFIC COMPANY
-@st.cache_data
 company_summ = get_comp_summary(cik_selected)
 df_q3 = enhance_comp_facts(lookback, cik_selected, 'Q3')
 df_q2 = enhance_comp_facts(lookback, cik_selected, 'Q2')
