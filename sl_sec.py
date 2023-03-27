@@ -109,6 +109,7 @@ def enhance_comp_facts(_years : int = 8, _cik : str = '0001045810', _period : st
 
     df = df[df['FRAME'].str.contains(f'{_period}')]
     df['YEAR'] = [x[2:6] for x in df['FRAME']]
+    df['PERIOD'] = [x[6:] for x in df['FRAME']]
     df['CALC'] = 0 #DUMMY COLUMN FOR CALCS
 
     if df['Revenues'].notnull().all():
@@ -161,7 +162,7 @@ df_q1 = enhance_comp_facts(lookback, cik_selected, 'Q1')
 frames = [df_q3, df_q2, df_q1]
 df_agg = pd.concat(frames)
 df_ardays_pivot = pd.pivot_table(df_agg, values='AR_DAYS', index=['YEAR'],
-                    columns=['fp'], aggfunc=np.sum)
+                    columns=['PERIOD'], aggfunc=np.sum)
 
 st.title('SEC Financials')
 
