@@ -163,8 +163,9 @@ df_agg = pd.concat(frames)
 df_ardays_pivot = pd.pivot_table(df_agg, values='AR_DAYS', index=['YEAR'],
                     columns=['PERIOD'], aggfunc=np.sum).fillna(0)
 
-df_revenue_pivot = pd.pivot_table(df_nvidia, values='GROSS_REV', index=['YEAR'],
+df_revenue_pivot = pd.pivot_table(df_agg, values='GROSS_REV', index=['YEAR'],
                     columns=['PERIOD'], aggfunc=np.sum).fillna(0)
+
 st.title('SEC Financials')
 
 st.sidebar.write(f"INDUSTRY: {company_summ['sic_desc']}")
