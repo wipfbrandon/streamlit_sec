@@ -157,6 +157,11 @@ df_q3 = enhance_comp_facts(lookback, cik_selected, 'Q3')
 df_q2 = enhance_comp_facts(lookback, cik_selected, 'Q2')
 df_q1 = enhance_comp_facts(lookback, cik_selected, 'Q1')
 
+frames = [df_q3, df_q2, df_q1]
+df_agg = pd.concat(frames)
+df_ardays_pivot = pd.pivot_table(df_agg, values='AR_DAYS', index=['YEAR'],
+                    columns=['fp'], aggfunc=np.sum)
+
 st.title('SEC Financials')
 
 st.sidebar.write(f"INDUSTRY: {company_summ['sic_desc']}")
@@ -180,3 +185,7 @@ st.dataframe(df_q2)
 Q1 Details
 '''
 st.dataframe(df_q1)
+'''
+AR DAYS
+'''
+st.line_chart(df_ardays_pivot)
