@@ -115,7 +115,13 @@ add_selectbox = st.sidebar.selectbox(
     (list(cik_dict.keys()))
 )
 
+add_selectbox_years = st.sidebar.selectbox(
+    'Lookback (Yrs)',
+    ([x for x in range(11)])
+)
+
 cik_selected = cik_dict[add_selectbox]
+lookback = add_selectbox_years
 
 #%% SELECT SPECIFIC COMPANY
 result_set = sec_api(cik_selected)
