@@ -144,25 +144,25 @@ add_selectbox_company = st.sidebar.selectbox(
 
 add_selectbox_years = st.sidebar.selectbox(
     'Lookback (Yrs)',
-    ([x for x in range(1, 11)])
+    ([x for x in range(2, 11)])
 )
 
 cik_selected = cik_dict[add_selectbox_company]
 lookback = add_selectbox_years
 
 #%% SELECT SPECIFIC COMPANY
-get_comp_summary(cik_selected)
+company_summ = get_comp_summary(cik_selected)
 df_q3 = enhance_comp_facts(lookback, cik_selected, 'Q3')
 df_q2 = enhance_comp_facts(lookback, cik_selected, 'Q2')
 df_q1 = enhance_comp_facts(lookback, cik_selected, 'Q1')
 
 st.title('SEC Financials')
 
-# st.sidebar.write(f"INDUSTRY: {get_comp_summary['sic_desc']}")
-# st.sidebar.write(f"EXCHANGE: {get_comp_summary['exchange']}")
-# st.sidebar.write(f"TICKER: {get_comp_summary['ticker']}")
-# st.sidebar.write(f"FYE: {get_comp_summary['fye'][:2]}/{get_comp_summary['fye'][-2:]}"
-# st.sidebar.write(f"OPERATIONS: {get_comp_summary['city_inc']}, {get_comp_summary['state_inc']}"
+st.sidebar.write(f"INDUSTRY: {company_summ['sic_desc']}")
+st.sidebar.write(f"EXCHANGE: {company_summ['exchange']}")
+st.sidebar.write(f"TICKER: {company_summ['ticker']}")
+st.sidebar.write(f"FYE: {company_summ['fye'][:2]}/{company_summ['fye'][-2:]}"
+st.sidebar.write(f"OPERATIONS: {company_summ['city_inc']}, {company_summ['state_inc']}"
 
 f"""
 Financials Metrics for {add_selectbox_company}:
