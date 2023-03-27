@@ -117,7 +117,7 @@ add_selectbox = st.sidebar.selectbox(
 
 add_selectbox_years = st.sidebar.selectbox(
     'Lookback (Yrs)',
-    ([x for x in range(11)])
+    ([x for x in range(0, 11)])
 )
 
 cik_selected = cik_dict[add_selectbox]
