@@ -55,7 +55,6 @@ def get_comp_summary(_cik: str) -> dict:
     return comp_summary
 
 
-@st.cache_data
 def get_comp_facts(_cik: str) -> pd.DataFrame:
     _headers = {'User-Agent': "pythonlearnin@gmail.com"}
     url = f'https://data.sec.gov/api/xbrl/companyfacts/CIK{_cik}.json'
@@ -102,6 +101,8 @@ def custom_revenue(rev, sales_rev, rev_from_cont):
     except:
         return 0
 
+
+@st.cache_data
 def enhance_comp_facts(_years : int = 8, _cik : str = '0001045810', _period : str = 'Q4') -> pd.DataFrame:
     df = clean_comp_facts(set_periods(_years), get_comp_facts(_cik))
 
