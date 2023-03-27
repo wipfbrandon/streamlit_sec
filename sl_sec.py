@@ -160,11 +160,12 @@ frames = [df_q3, df_q2, df_q1]
 df_agg = pd.concat(frames)
 
 #SUMMARY PIVOTS
-df_ardays_pivot = pd.pivot_table(df_agg, values='AR_DAYS', index=['YEAR'],
-                    columns=['PERIOD'], aggfunc=np.sum).fillna(0)
+def period_pivot(_df, _metric: str = 'AR_DAYS') -> pd.DataFrame:
+    return pd.pivot_table(_df, values=_metric, index=['YEAR'], columns=['PERIOD'], aggfunc=np.sum).fillna(0)
 
-df_revenue_pivot = pd.pivot_table(df_agg, values='GROSS_REV', index=['YEAR'],
-                    columns=['PERIOD'], aggfunc=np.sum).fillna(0)
+df_revenue_pivot = period_pivot(df_agg,'GROSS_REV')
+df_ardays_pivot = period_pivot(df_agg,'AR_DAYS')
+df_assets_pivot = period_pivot(df_agg,'Assets')
 
 st.title('SEC Financials')
 
@@ -189,6 +190,10 @@ st.dataframe(df_q2)
 Q1 Details
 '''
 st.dataframe(df_q1)
+'''
+Assets
+'''
+st.line_chart(df_assets_pivot
 '''
 REVENUE
 '''
