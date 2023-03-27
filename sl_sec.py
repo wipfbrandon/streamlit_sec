@@ -158,11 +158,11 @@ df_q1 = enhance_comp_facts(lookback, cik_selected, 'Q1')
 
 st.title('SEC Financials')
 
-st.sidebar.write(f"INDUSTRY: {get_comp_summary['sic_desc']}")
-st.sidebar.write(f"EXCHANGE: {get_comp_summary['exchange']}")
-st.sidebar.write(f"TICKER: {get_comp_summary['ticker']}")
-st.sidebar.write(f"FYE: {get_comp_summary['fye'][:2]}/{get_comp_summary['fye'][-2:]}"
-st.sidebar.write(f"OPERATIONS: {get_comp_summary['city_inc']}, {get_comp_summary['state_inc']}"
+# st.sidebar.write(f"INDUSTRY: {get_comp_summary['sic_desc']}")
+# st.sidebar.write(f"EXCHANGE: {get_comp_summary['exchange']}")
+# st.sidebar.write(f"TICKER: {get_comp_summary['ticker']}")
+# st.sidebar.write(f"FYE: {get_comp_summary['fye'][:2]}/{get_comp_summary['fye'][-2:]}"
+# st.sidebar.write(f"OPERATIONS: {get_comp_summary['city_inc']}, {get_comp_summary['state_inc']}"
 
 f"""
 Financials Metrics for {add_selectbox_company}:
