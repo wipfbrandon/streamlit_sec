@@ -102,7 +102,6 @@ def custom_revenue(rev, sales_rev, rev_from_cont):
         return 0
 
 
-@st.cache_data
 def enhance_comp_facts(_years : int = 8, _cik : str = '0001045810', _period : str = 'Q4') -> pd.DataFrame:
     df = clean_comp_facts(set_periods(_years), get_comp_facts(_cik))
 
@@ -152,8 +151,8 @@ cik_selected = cik_dict[add_selectbox_company]
 lookback = add_selectbox_years
 
 #%% SELECT SPECIFIC COMPANY
+@st.cache_data
 company_summ = get_comp_summary(cik_selected)
-
 df_q3 = enhance_comp_facts(lookback, cik_selected, 'Q3')
 df_q2 = enhance_comp_facts(lookback, cik_selected, 'Q2')
 df_q1 = enhance_comp_facts(lookback, cik_selected, 'Q1')
