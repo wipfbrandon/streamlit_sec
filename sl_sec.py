@@ -162,8 +162,8 @@ st.title('SEC Financials')
 st.sidebar.write(f"INDUSTRY: {company_summ['sic_desc']}")
 st.sidebar.write(f"EXCHANGE: {company_summ['exchange']}")
 st.sidebar.write(f"TICKER: {company_summ['ticker']}")
-st.sidebar.write(f"FYE: {company_summ['fye'][:2]}/{company_summ['fye'][-2:]}"
-st.sidebar.write(f"OPERATIONS: {company_summ['city_inc']}, {company_summ['state_inc']}"
+st.sidebar.write(f"FYE: {company_summ['fye'][:2]}/{company_summ['fye'][-2:]}")
+st.sidebar.write(f"OPERATIONS: {company_summ['city_inc']}, {company_summ['state_inc']}")
 
 f"""
 Financials Metrics for {add_selectbox_company}:
