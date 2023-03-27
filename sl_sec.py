@@ -189,4 +189,5 @@ st.dataframe(df_q1)
 '''
 AR DAYS
 '''
+st.dataframe(df_ardays_pivot)
 st.line_chart(df_ardays_pivot)
