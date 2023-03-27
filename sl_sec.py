@@ -14,103 +14,129 @@ cik_dict = {'Daktronics': '0000915779',
             'Werner Enterprises':'0000793074',
             'SeaWorld':'0001564902',       
             'Cedar Fair':'0000811532',
-            'NVIDIA':'0001045810',
-    }
+            'NVIDIA':'0001045810',}
 
-@st.cache_data
-def sec_api(cik):
+def set_periods(_lookback_years: int) -> pd.DataFrame:
+    curr_qtr = date.today().month // 4 + 1
     curr_year = date.today().year
-    lookback_years = 8
-
     period_list = []
-    for x in range(0, lookback_years):
+    for x in range(0, _lookback_years):
         new_year = curr_year - x
         frame_ye = f'CY{new_year}'
         period_list.append(frame_ye)
         for y in range(4, 0, -1):
-            frame_qe = f'CY{new_year}Q{y}'
-            period_list.append(frame_qe)
+            if new_year == curr_year:
+                if y >= curr_qtr:
+                    pass
+                else:
+                    frame_qe = f'CY{new_year}Q{y}'
+                    period_list.append(frame_qe)
+            else:
+                frame_qe = f'CY{new_year}Q{y}'
+                period_list.append(frame_qe)
+    df_frames = pd.DataFrame(index=period_list)
+    return df_frames
 
-    df_final = pd.DataFrame(index=period_list)
-	
-    headers = {'User-Agent': 'pythonlearnin@gmail.com'}
-#COMPANY SUMMARY
-    comp_summ_list = []
-    url = f'https://data.sec.gov/submissions/CIK{cik}.json'
-    response = requests.get(url, headers=headers)
-    cik_name = response.json()['name']
-    comp_summ_list.append(cik_name)
-    sic_desc = response.json()['sicDescription']
-    comp_summ_list.append(sic_desc)
-    ticker = response.json()['tickers'][0]
-    comp_summ_list.append(ticker)
-    exchange = response.json()['exchanges'][0]
-    comp_summ_list.append(exchange)
-    fye = response.json()['fiscalYearEnd']
-    comp_summ_list.append(fye)
-    state_inc = response.json()['addresses']['business']['stateOrCountry']
-    comp_summ_list.append(state_inc)
-    city_inc = response.json()['addresses']['business']['city']
-    comp_summ_list.append(city_inc)
 
-#COMPANY FACTS
-    url =f'https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json'
-    r = requests.get(url, headers=headers)
-    df = pd.json_normalize(r.json()['facts']['us-gaap'])
-    
+@st.cache_data
+def get_comp_summary(_cik: str) -> dict:
+    pass
+    _headers = {'User-Agent': "pythonlearnin@gmail.com"}
+    url = f'https://data.sec.gov/submissions/CIK{_cik}.json'
+    r = requests.get(url, headers=_headers)
+    comp_summary = {'cik_name':r.json()['name'],
+                    'sic_desc':r.json()['sicDescription'],
+                    'ticker':r.json()['tickers'][0],
+                    'exchange':r.json()['exchanges'][0],
+                    'fye':r.json()['fiscalYearEnd'],
+                    'state_inc':r.json()['addresses']['business']['stateOrCountry'],
+                    'city_inc':r.json()['addresses']['business']['city']}
+    return comp_summary
+
+
+@st.cache_data
+def get_comp_facts(_cik: str) -> pd.DataFrame:
+    _headers = {'User-Agent': "pythonlearnin@gmail.com"}
+    url = f'https://data.sec.gov/api/xbrl/companyfacts/CIK{_cik}.json'
+    r = requests.get(url, headers=_headers)
+    df_raw = pd.json_normalize(r.json()['facts']['us-gaap'])
+    return df_raw
+
+
+def clean_comp_facts(df_periods, df_raw):
+    df_final = df_periods
+    df_sec = df_raw
+
     keep_list = ('Assets', 'Liabilities', 'StockholdersEquity', 'LiabilitiesAndStockholdersEquity',
-                 'SalesRevenueNet', 'CostOfGoodsAndServicesSold', ' NetIncomeLoss',
-                 'Revenues', 'SalesRevenueNet', 'RevenueFromContractWithCustomerExcludingAssessedTax')
+             'SalesRevenueNet', 'CostOfGoodsAndServicesSold', ' NetIncomeLoss', 'AccountsReceivableNetCurrent',
+             'Revenues', 'SalesRevenueNet', 'RevenueFromContractWithCustomerExcludingAssessedTax')
 
-    for x, col in enumerate(df.columns):
+    for x, col in enumerate(df_sec.columns):
         col_name = col.split('.')[0]
         col_type = col.split('.')[1]
-    
+
         if col_name in keep_list:
             if col_type == 'units':
-                temp_list = df[col].explode('TEMP')
+                temp_list = df_sec[col].explode('TEMP')
                 df_temp = (pd.DataFrame(temp_list.apply(pd.Series)))
+                df_temp.frame = df_temp.frame.str.replace('I', '')
                 df_temp = df_temp.rename(columns={'val':f'{col_name}'})
-                df_temp_cy  = df_temp
-                df_temp_cy['frame'] = df_temp_cy['frame'].str.replace('I', '')
-                df_temp_cy = df_temp_cy.set_index('frame')
-    
+                df_temp = df_temp.set_index('frame')
+
                 if df_final.shape[1] == 0:
-                    print(df_final.shape)
-                    df_final = df_final.merge(df_temp_cy, how='left', left_index=True, right_index=True)
+                    df_final = df_final.merge(df_temp, how='left', left_index=True, right_index=True)
                     df_final = df_final[['end','filed','fy','fp','form',f'{col_name}']]
                 else:
-                    df_temp_cy = df_temp_cy[[f'{col_name}']]
-                    df_final = df_final.merge(df_temp_cy, how='left', left_index=True, right_index=True)
+                    df_temp = df_temp[[f'{col_name}']]
+                    df_final = df_final.merge(df_temp, how='left', left_index=True, right_index=True)
 
     df_final = df_final.sort_index(ascending=False).reset_index().rename(columns={'index': 'FRAME'})
+    return df_final
 
-    days_dict = {'FY':365.00, 'Q4':91.25, 'Q3':91.25, 'Q2':91.25, 'Q1':91.25}
-    def quarterly_financials(df_source, period='FY'):
-        days = days_dict[period]
-        df = df_source[df_source['FRAME'].str.contains(f'{period}')]
 
-        try:
-            df['REVENUE_CUSTOM'] = df[['Revenues', 'SalesRevenueNet', 'RevenueFromContractWithCustomerExcludingAssessedTax']].max(axis=1)
-            df['REVENUE_CUSTOM'] = df[['Revenues', 'SalesRevenueNet']].max(axis=1)
-            df['REVENUE_CUSTOM'] = df[['Revenues']]
-            df['PROFIT_MARGIN'] = df['NetIncomeLoss'] / df['REVENUE_CUSTOM']
-            df['NET_INCOME_PCT_CHG'] = df['NetIncomeLoss'].pct_change(periods=-1)
-            df['CURRENT_RATIO'] = df['AssetsCurrent'] / df['LiabilitiesCurrent']
-            df['AR_DAYS'] = (df['AccountsReceivableNetCurrent'] / df['REVENUE_CUSTOM']) * days
-            df['LIABILITIES_CUSTOM'] = df['LiabilitiesAndStockholdersEquity'] - df['StockholdersEquity']
-        except:
-            pass
-        df = df.set_index(['FRAME'])
-        df = df.dropna(axis=1, how='all')
-        return df
+def custom_revenue(rev, sales_rev, rev_from_cont):
+    try:
+        rev_list = pd.Series([rev, sales_rev, rev_from_cont]).fillna(0).astype(int)
+        return rev_list.max()
+    except:
+        return 0
 
-    df_ye = quarterly_financials(df_final, 'Q4')
-    df_q3 = quarterly_financials(df_final, 'Q3')
-    return df_ye, comp_summ_list, df_q3
+
+def enhance_comp_facts(_years : int = 8, _cik : str = '0001045810', _period : str = 'Q4') -> pd.DataFrame:
+    df = clean_comp_facts(set_periods(_years), get_comp_facts(_cik))
+
+    df = df[df['FRAME'].str.contains(f'{_period}')]
+    df['YEAR'] = [x[2:6] for x in df['FRAME']]
+    df['CALC'] = 0 #DUMMY COLUMN FOR CALCS
+
+    if df['Revenues'].notnull().all():
+        df['GROSS_REV'] = df['Revenues']
+    elif set(['Revenues', 'SalesRevenueNet', 'RevenueFromContractWithCustomerExcludingAssessedTax']).issubset(df.columns):
+        df['GROSS_REV'] = df.apply(lambda row: custom_revenue(row['Revenues'],row['SalesRevenueNet'],row['RevenueFromContractWithCustomerExcludingAssessedTax']),axis=1)
+    elif set(['Revenues','RevenueFromContractWithCustomerExcludingAssessedTax']).issubset(df.columns):
+        df['GROSS_REV'] = df.apply(lambda row: custom_revenue(row['Revenues'],row['CALC'],row['RevenueFromContractWithCustomerExcludingAssessedTax']),axis=1)
+
+    if 'GROSS_REV' in df:
+        df['AR_DAYS'] = ((df['AccountsReceivableNetCurrent'] / df['GROSS_REV']) * 91.25).round(2)
+
+    if set(['NetIncomeLoss','GROSS_REV']).issubset(df.columns):
+        df['PROFIT_MARGIN'] = df['NetIncomeLoss'] / df['GROSS_REV']
+
+    if 'NetIncomeLoss' in df:
+        df['NET_INCOME_PCT_CHG'] = df['NetIncomeLoss'].pct_change(periods=-1)
+
+    if set(['AssetsCurrent','LiabilitiesCurrent']).issubset(df.columns):
+        df['CURRENT_RATIO'] = df['AssetsCurrent'] / df['LiabilitiesCurrent']
+
+    if set(['LiabilitiesAndStockholdersEquity','StockholdersEquity']).issubset(df.columns):
+        df['LIABILITIES'] = df['LiabilitiesAndStockholdersEquity'] - df['StockholdersEquity']
+
+    df = df.set_index(['FRAME'])
+    df = df.dropna(axis=1, how='all') #DROP ROWS WHERE ALL VALUES = NAN
+    return df
 
 #%% STREAMLIT OUTPUT
-add_selectbox = st.sidebar.selectbox(
+add_selectbox_company = st.sidebar.selectbox(
     'Select your Company',
     (list(cik_dict.keys()))
 )
@@ -120,30 +146,35 @@ add_selectbox_years = st.sidebar.selectbox(
     ([x for x in range(1, 11)])
 )
 
-cik_selected = cik_dict[add_selectbox]
+cik_selected = cik_dict[add_selectbox_company]
 lookback = add_selectbox_years
 
 #%% SELECT SPECIFIC COMPANY
-result_set = sec_api(cik_selected)
-df_final = result_set[0]
-list_details = result_set[1]
-df_3q = result_set[2]
+get_comp_summary(cik)
+df_q3 = enhance_comp_facts(lookback, cik, 'Q3')
+df_q2 = enhance_comp_facts(lookback, cik, 'Q2')
+df_q1 = enhance_comp_facts(lookback, cik, 'Q1')
 
 st.title('SEC Financials')
-st.sidebar.write(f'INDUSTRY: {list_details[1]}')
-st.sidebar.write(f'EXCHANGE: {list_details[3]}')
-st.sidebar.write(f'TICKER: {list_details[2]}')
-st.sidebar.write(f'FYE: {list_details[4][:2]}/{list_details[4][-2:]}')
-st.sidebar.write(f'OPERATIONS: {list_details[6]}, {list_details[5]}')
+
+st.sidebar.write(f"INDUSTRY: {get_comp_summary['sic_desc']}")
+st.sidebar.write(f"EXCHANGE: {get_comp_summary['exchange']}")
+st.sidebar.write(f"TICKER: {get_comp_summary['ticker']}")
+st.sidebar.write(f"FYE: {get_comp_summary['fye'][:2]}/{get_comp_summary['fye'][-2:]}"
+st.sidebar.write(f"OPERATIONS: {get_comp_summary['city_inc']}, {get_comp_summary['state_inc']}"
 
 f"""
-Financials Metrics for {add_selectbox}:
+Financials Metrics for {add_selectbox_company}:
 """         
-'''---
-YE Details
-'''
-st.dataframe(df_final)
 '''---
 Q3 Details
 '''
-st.dataframe(df_3q)
+st.dataframe(df_q3)
+'''---
+Q2 Details
+'''
+st.dataframe(df_q2)
+'''
+Q1 Details
+'''
+st.dataframe(df_q1)
