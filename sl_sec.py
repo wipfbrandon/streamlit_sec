@@ -193,7 +193,7 @@ st.dataframe(df_q1)
 '''
 Assets
 '''
-st.line_chart(df_assets_pivot
+st.line_chart(df_assets_pivot)
 '''
 REVENUE
 '''
