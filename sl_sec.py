@@ -50,7 +50,8 @@ def get_comp_summary(_cik: str) -> dict:
                     'exchange':r.json()['exchanges'][0],
                     'fye':r.json()['fiscalYearEnd'],
                     'state_inc':r.json()['addresses']['business']['stateOrCountry'],
-                    'city_inc':r.json()['addresses']['business']['city']}
+                    'city_inc':r.json()['addresses']['business']['city'],
+		   }
     return comp_summary
 
 
@@ -150,10 +151,10 @@ cik_selected = cik_dict[add_selectbox_company]
 lookback = add_selectbox_years
 
 #%% SELECT SPECIFIC COMPANY
-get_comp_summary(cik)
-df_q3 = enhance_comp_facts(lookback, cik, 'Q3')
-df_q2 = enhance_comp_facts(lookback, cik, 'Q2')
-df_q1 = enhance_comp_facts(lookback, cik, 'Q1')
+get_comp_summary(cik_selected)
+df_q3 = enhance_comp_facts(lookback, cik_selected, 'Q3')
+df_q2 = enhance_comp_facts(lookback, cik_selected, 'Q2')
+df_q1 = enhance_comp_facts(lookback, cik_selected, 'Q1')
 
 st.title('SEC Financials')
 
