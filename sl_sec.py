@@ -152,6 +152,7 @@ lookback = add_selectbox_years
 
 #%% SELECT SPECIFIC COMPANY
 company_summ = get_comp_summary(cik_selected)
+
 df_q3 = enhance_comp_facts(lookback, cik_selected, 'Q3')
 df_q2 = enhance_comp_facts(lookback, cik_selected, 'Q2')
 df_q1 = enhance_comp_facts(lookback, cik_selected, 'Q1')
