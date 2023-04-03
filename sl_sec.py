@@ -5,7 +5,10 @@ import requests
 from datetime import date
 
 pd.options.mode.chained_assignment = None  # default='warn'
-		
+
+#Using Streamlit's "Secrets" settings
+user_email = st.secrets["email"]
+
 cik_dict = {'Daktronics': '0000915779',
             '3M Company': '0000066740',
             'Union Pacific':'0000100885',
@@ -41,7 +44,7 @@ def set_periods(_lookback_years: int) -> pd.DataFrame:
 
 def get_comp_summary(_cik: str) -> dict:
     pass
-    _headers = {'User-Agent': st.secrets["email"]}
+    _headers = {'User-Agent': user_email}
     url = f'https://data.sec.gov/submissions/CIK{_cik}.json'
     r = requests.get(url, headers=_headers)
     comp_summary = {'cik_name':r.json()['name'],
@@ -56,7 +59,7 @@ def get_comp_summary(_cik: str) -> dict:
 
 
 def get_comp_facts(_cik: str) -> pd.DataFrame:
-    _headers = {'User-Agent': "pythonlearnin@gmail.com"}
+    _headers = {'User-Agent': user_email}
     url = f'https://data.sec.gov/api/xbrl/companyfacts/CIK{_cik}.json'
     r = requests.get(url, headers=_headers)
     df_raw = pd.json_normalize(r.json()['facts']['us-gaap'])
