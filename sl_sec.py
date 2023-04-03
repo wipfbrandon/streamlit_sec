@@ -4,6 +4,8 @@ import numpy as np
 import requests
 from datetime import date
 
+st.write("EMAIL", st.secrets["email"])
+
 pd.options.mode.chained_assignment = None  # default='warn'
 		
 cik_dict = {'Daktronics': '0000915779',
@@ -41,7 +43,7 @@ def set_periods(_lookback_years: int) -> pd.DataFrame:
 
 def get_comp_summary(_cik: str) -> dict:
     pass
-    _headers = {'User-Agent': "pythonlearnin@gmail.com"}
+    _headers = {'User-Agent': EMAIL}
     url = f'https://data.sec.gov/submissions/CIK{_cik}.json'
     r = requests.get(url, headers=_headers)
     comp_summary = {'cik_name':r.json()['name'],
